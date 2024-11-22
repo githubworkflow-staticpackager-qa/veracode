@@ -44,6 +44,7 @@ jobs:
         repository: ${{ inputs.repository }}
         ref: ${{ inputs.ref }}
         token: ${{ inputs.token }}
+        path: 'source-code'
 
     - uses: actions/checkout@v4
       with:
@@ -75,13 +76,14 @@ jobs:
         tar -zxvf $cliFile
         cd $cliFileName
         export PATH="veracode-helper/helper/cli/$cliFileName:$PATH"
-        cd $working_path
         if [[ "${{ inputs.event_name }}" == *"ruby"* ]]; then
+          cd source-code
           gem install bundler -v ${{ inputs.bundle_version }}
           gem install veracode
           bundle install
         fi
-        veracode package --source . --output veracode-artifacts --trust
+        cd $working_path
+        veracode package --source source-code --output veracode-artifacts --trust
 
     - name: Package error
       if: failure() && steps.application_package.outcome == 'failure'
